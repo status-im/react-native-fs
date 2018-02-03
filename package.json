@@ -20,7 +20,8 @@
     "filesystem",
     "download",
     "upload",
-    "file-transfer"
+    "file-transfer",
+    "desktop"
   ],
   "author": "Johannes Lumpe <johannes@lum.pe> (https://github.com/johanneslumpe)",
   "license": "MIT",
