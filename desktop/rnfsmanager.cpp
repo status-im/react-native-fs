@@ -57,7 +57,10 @@ void RNFSManager::readDir(QString dirPath, const ModuleInterface::ListArgumentBl
 }
 
 void RNFSManager::exists(QString filepath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
+    Q_D(RNFSManager);
+    QFile file(filepath);
 
+    resolve(d->bridge, QVariantList{{QVariant(file.exists())}});
 }
 
 void RNFSManager::stat(QString filepath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
@@ -65,7 +68,18 @@ void RNFSManager::stat(QString filepath, const ModuleInterface::ListArgumentBloc
 }
 
 void RNFSManager::writeFile(QString filepath, QString base64Content, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
+    Q_D(RNFSManager);
+    QFile file(filepath);
+    if (!file.open(QIODevice::WriteOnly)) {
+        reject(d->bridge, QVariantList());
+        return;
+    }
 
+    QString content(QByteArray::fromBase64(base64Content.toUtf8()));
+
+    file.write(content.toStdString().c_str(), content.length());
+    resolve(d->bridge, QVariantList());
+    file.close();
 }
 
 void RNFSManager::appendFile(QString filepath, QString base64Content, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
