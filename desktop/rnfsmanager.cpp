@@ -53,7 +53,14 @@ QVariantMap RNFSManager::constantsToExport() {
 }
 
 void RNFSManager::readDir(QString dirPath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
+  Q_D(RNFSManager);
+  QDir dir(dirPath);
+  if (!dir.exists()) {
+      reject(d->bridge, QVariantList());
+      return;
+  }
 
+  resolve(d->bridge, QVariantList{{dir.entryList()}});
 }
 
 void RNFSManager::exists(QString filepath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
@@ -91,11 +98,27 @@ void RNFSManager::write(QString filepath, QString base64Content, int position, c
 }
 
 void RNFSManager::unlink(QString filepath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
+    Q_D(RNFSManager);
+    QDir dir(filepath);
+    if(dir.exists()) {
+        dir.rmpath(filepath);
+        resolve(d->bridge, QVariantList{});
+        return;
+    }
 
+    QFile file(filepath);
+    if(file.exists()) {
+        file.remove();
+        resolve(d->bridge, QVariantList{});
+        return;
+    }
 }
 
 void RNFSManager::mkdir(QString filepath, QVariantMap options, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
-
+    Q_D(RNFSManager);
+    QDir dir = QDir::root();
+    dir.mkpath(filepath);
+    resolve(d->bridge, QVariantList{});
 }
 
 void RNFSManager::readFile(QString filepath, const ModuleInterface::ListArgumentBlock& resolve, const ModuleInterface::ListArgumentBlock& reject) {
@@ -202,6 +225,3 @@ bool RNFSManager::removeRecursively(const QString& path) {
         return QFile::remove(path);
     }
 }
-
-
-
